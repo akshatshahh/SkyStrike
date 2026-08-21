@@ -124,13 +124,8 @@ def last_pull() -> dict | None:
 
 def sparkline_svg(values: list[float], w: int = 88, h: int = 20) -> str:
     vals = [v for v in values if v is not None]
-    if not vals:
+    if len(vals) < 2:
         return ""
-    if len(vals) == 1:
-        return (
-            f'<svg class="spark" viewBox="0 0 {w} {h}" width="{w}" height="{h}" aria-hidden="true">'
-            f'<circle cx="{w * 0.5:.1f}" cy="{h * 0.5:.1f}" r="2"/></svg>'
-        )
     lo, hi = min(vals), max(vals)
     span = (hi - lo) or 1.0
     n = len(vals)

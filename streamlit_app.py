@@ -31,16 +31,20 @@ st.markdown(
         height: 0;
       }
       .block-container {
-        padding: 18px 24px 0 !important;
+        padding: 12px 8px 0 !important;
         max-width: 980px !important;
       }
       [data-testid="stAppViewContainer"] {
-        background: #c9bda4;
+        background: #efe6d0;
       }
       iframe { background: #efe6d0; }
+      div[data-testid="stPills"] {
+        gap: 6px;
+      }
       div[data-testid="stPills"] button {
-        font-family: "IBM Plex Mono", ui-monospace, monospace;
-        font-size: 0.78rem;
+        font-family: "IBM Plex Mono", ui-monospace, monospace !important;
+        font-size: 11px !important;
+        border-radius: 0 !important;
         background: #efe6d0 !important;
         color: #1a140c !important;
         border: 1px solid #1a140c !important;
@@ -50,10 +54,12 @@ st.markdown(
         color: #efe6d0 !important;
       }
       .stButton button {
-        font-family: "IBM Plex Mono", ui-monospace, monospace;
-        background: #efe6d0;
-        color: #1a140c;
-        border: 1px solid #1a140c;
+        font-family: "IBM Plex Mono", ui-monospace, monospace !important;
+        font-size: 11px !important;
+        border-radius: 0 !important;
+        background: #efe6d0 !important;
+        color: #1a140c !important;
+        border: 1px solid #1a140c !important;
       }
     </style>
     """,

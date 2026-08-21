@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
   <style>{{ css | safe }}</style>
 </head>
-<body>
+<body{% if not chips %} class="embed"{% endif %}>
   <div class="sheet">
     <header class="mast">
       <div class="mast-name">
@@ -18,8 +18,8 @@
       </div>
       <div class="mast-meta">
         <p>showing {{ shown }}</p>
-        <p>{{ meta.priced }} of {{ meta.count }} have a published price</p>
-        <p>last pull {{ pull_when }}</p>
+        <p>{{ meta.priced }} priced / {{ meta.count }} listed</p>
+        <p>pulled {{ pull_when }}</p>
         {% if not setup and pull_href %}
         <p><a class="pull" href="{{ pull_href }}">pull again</a></p>
         {% endif %}
@@ -138,9 +138,9 @@
           {% endif %}
         </div>
         {% if row.url %}
-        <a class="stub" href="{{ row.url }}" target="_blank" rel="noreferrer">{{ row.seller }}</a>
+        <a class="stub" href="{{ row.url }}" target="_blank" rel="noreferrer" title="{{ row.seller }}">tickets</a>
         {% else %}
-        <span class="stub dead">—</span>
+        <span class="stub dead">tickets</span>
         {% endif %}
       </li>
       {% endfor %}
@@ -154,10 +154,9 @@
     <footer class="foot">
       <p>Powered by Ticketmaster.</p>
       <p>
-        Discovery is Ticketmaster’s catalog. A listing may sell on ticketmaster.com
-        or ticketweb.ca — Ticketweb is their Canadian / club storefront, same company.
-        The stub on the right is the URL they sent. A missing low / high means they
-        didn’t publish a range. We don’t invent one.
+        The stub always says tickets. Hover it to see whether that URL is
+        Ticketmaster or Ticketweb — same company, different checkout.
+        A missing low / high means Discovery didn’t send a range.
       </p>
     </footer>
   </div>

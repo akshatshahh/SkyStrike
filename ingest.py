@@ -12,6 +12,7 @@ from ticketmaster import (
     parse_event,
     search_events,
 )
+from urls import safe_public_url
 from watchlist import ARTISTS, EVENTS_PER_QUERY, SEARCHES, VENUES
 
 SLEEP = 0.25
@@ -163,7 +164,7 @@ def persist(events: dict[str, dict]) -> tuple[int, int]:
             row = {
                 "id": parsed["id"],
                 "name": parsed["name"],
-                "url": parsed.get("url"),
+                "url": safe_public_url(parsed.get("url"), parsed["id"]),
                 "attraction": parsed.get("attraction"),
                 "venue_id": venue["id"] if venue else None,
                 "local_date": parsed.get("local_date"),

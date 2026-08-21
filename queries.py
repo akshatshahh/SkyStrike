@@ -4,6 +4,7 @@ from decimal import Decimal
 from urllib.parse import urlparse
 
 from db import get_conn, init_schema
+from urls import safe_public_url
 
 
 def _num(value) -> float | None:
@@ -245,7 +246,7 @@ def load_board() -> tuple[list[dict], dict]:
                 "id": raw["id"],
                 "name": raw["name"],
                 "headline": raw.get("attraction") or raw["name"],
-                "url": raw.get("url") or "",
+                "url": safe_public_url(raw.get("url"), raw["id"]) or "",
                 "venue_name": raw.get("venue_name") or "—",
                 "city": city,
                 "state": state,

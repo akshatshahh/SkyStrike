@@ -1,11 +1,11 @@
 import time
 from datetime import datetime, timezone
-from urllib.parse import urlparse
 
 import requests
 
 from bowl import is_bowl_index, is_bowl_venue, performance_url as bowl_performance_url
 from settings import tm_key
+from urls import https_url, marketplace_404, safe_public_url
 
 BASE = "https://app.ticketmaster.com/discovery/v2"
 SESSION = requests.Session()
@@ -84,30 +84,6 @@ def search_events(**params) -> list[dict]:
     return ((data.get("_embedded") or {}).get("events")) or []
 
 
-def _https(url: str | None) -> str | None:
-    text = (url or "").strip()
-    if not text:
-        return None
-    if text.startswith("http://"):
-        text = "https://" + text[len("http://") :]
-    return text
-
-
-def marketplace_404(url: str | None, event_id: str | None = None) -> bool:
-    """Discovery's /event/Z7… Ticketmaster links 404 on the public site."""
-    parsed = urlparse(url or "")
-    host = (parsed.hostname or "").lower()
-    if "ticketmaster." not in host:
-        return False
-    parts = [p for p in parsed.path.split("/") if p]
-    if len(parts) != 2 or parts[0].lower() != "event":
-        return False
-    token = parts[1]
-    if token.startswith("Z7") or token.startswith("z7"):
-        return True
-    return bool(event_id) and token == event_id
-
-
 def _venue_name(raw: dict) -> str | None:
     venues = ((raw.get("_embedded") or {}).get("venues")) or []
     if not venues:
@@ -142,27 +118,26 @@ def enrich_url(parsed: dict) -> None:
 
 def pick_event_url(raw: dict) -> str | None:
     event_id = raw.get("id")
-    url = _https(raw.get("url"))
+    url = https_url(raw.get("url"))
     outlets = raw.get("outlets") or []
     box = next(
         (
-            _https(item.get("url"))
+            https_url(item.get("url"))
             for item in outlets
             if (item.get("type") or "") == "venueBoxOffice" and item.get("url")
         ),
         None,
     )
+    chosen = None
     if url and not marketplace_404(url, event_id) and not is_bowl_index(url):
-        return url
-    if is_bowl_venue(_venue_name(raw)):
-        bowl = bowl_performance_url(_local_date(raw), raw.get("name"))
-        if bowl:
-            return bowl
-    if box and not is_bowl_index(box):
-        return box
-    if url and marketplace_404(url, event_id):
-        return None
-    return box or url
+        chosen = url
+    elif is_bowl_venue(_venue_name(raw)):
+        chosen = bowl_performance_url(_local_date(raw), raw.get("name"))
+    if not chosen and box and not is_bowl_index(box):
+        chosen = box
+    if not chosen and url and not marketplace_404(url, event_id):
+        chosen = url
+    return safe_public_url(chosen, event_id)
 
 
 def pick_image(images: list[dict]) -> str | None:

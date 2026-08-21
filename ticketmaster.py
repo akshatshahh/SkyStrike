@@ -1,8 +1,10 @@
 import time
 from datetime import datetime, timezone
+from urllib.parse import urlparse
 
 import requests
 
+from bowl import is_bowl_index, is_bowl_venue, performance_url as bowl_performance_url
 from settings import tm_key
 
 BASE = "https://app.ticketmaster.com/discovery/v2"
@@ -80,6 +82,87 @@ def search_events(**params) -> list[dict]:
     }
     data = _get("events.json", query)
     return ((data.get("_embedded") or {}).get("events")) or []
+
+
+def _https(url: str | None) -> str | None:
+    text = (url or "").strip()
+    if not text:
+        return None
+    if text.startswith("http://"):
+        text = "https://" + text[len("http://") :]
+    return text
+
+
+def marketplace_404(url: str | None, event_id: str | None = None) -> bool:
+    """Discovery's /event/Z7… Ticketmaster links 404 on the public site."""
+    parsed = urlparse(url or "")
+    host = (parsed.hostname or "").lower()
+    if "ticketmaster." not in host:
+        return False
+    parts = [p for p in parsed.path.split("/") if p]
+    if len(parts) != 2 or parts[0].lower() != "event":
+        return False
+    token = parts[1]
+    if token.startswith("Z7") or token.startswith("z7"):
+        return True
+    return bool(event_id) and token == event_id
+
+
+def _venue_name(raw: dict) -> str | None:
+    venues = ((raw.get("_embedded") or {}).get("venues")) or []
+    if not venues:
+        return None
+    return (venues[0].get("name") or "").strip() or None
+
+
+def _local_date(raw: dict) -> str | None:
+    start = ((raw.get("dates") or {}).get("start")) or {}
+    return start.get("localDate")
+
+
+def enrich_url(parsed: dict) -> None:
+    """Search sometimes omits outlets; recover a URL that actually opens."""
+    url = parsed.get("url")
+    if url and not marketplace_404(url, parsed.get("id")) and not is_bowl_index(url):
+        return
+    try:
+        detail = _get(f"events/{parsed['id']}.json", {})
+        time.sleep(0.25)
+        parsed["url"] = pick_event_url(detail) or parsed.get("url")
+    except TicketmasterError:
+        pass
+    venue = (parsed.get("venue") or {}).get("name") if isinstance(parsed.get("venue"), dict) else None
+    if is_bowl_venue(venue) and (
+        not parsed.get("url") or marketplace_404(parsed.get("url"), parsed.get("id")) or is_bowl_index(parsed.get("url"))
+    ):
+        bowl = bowl_performance_url(parsed.get("local_date"), parsed.get("name"))
+        if bowl:
+            parsed["url"] = bowl
+
+
+def pick_event_url(raw: dict) -> str | None:
+    event_id = raw.get("id")
+    url = _https(raw.get("url"))
+    outlets = raw.get("outlets") or []
+    box = next(
+        (
+            _https(item.get("url"))
+            for item in outlets
+            if (item.get("type") or "") == "venueBoxOffice" and item.get("url")
+        ),
+        None,
+    )
+    if url and not marketplace_404(url, event_id) and not is_bowl_index(url):
+        return url
+    if is_bowl_venue(_venue_name(raw)):
+        bowl = bowl_performance_url(_local_date(raw), raw.get("name"))
+        if bowl:
+            return bowl
+    if box and not is_bowl_index(box):
+        return box
+    if url and marketplace_404(url, event_id):
+        return None
+    return box or url
 
 
 def pick_image(images: list[dict]) -> str | None:
@@ -160,7 +243,7 @@ def parse_event(raw: dict) -> dict | None:
     return {
         "id": event_id,
         "name": name,
-        "url": raw.get("url"),
+        "url": pick_event_url(raw),
         "attraction": attraction,
         "venue": venue,
         "local_date": local_date,

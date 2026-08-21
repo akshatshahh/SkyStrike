@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from db import get_conn, init_schema
 from ticketmaster import (
     best_venue_match,
+    enrich_url,
     parse_event,
     search_events,
 )
@@ -108,6 +109,7 @@ def _snapshot(cur, event: dict) -> None:
 def _stash(bucket: dict, raw: dict) -> None:
     parsed = parse_event(raw)
     if parsed and parsed["id"] not in bucket:
+        enrich_url(parsed)
         bucket[parsed["id"]] = parsed
 
 

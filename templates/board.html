@@ -19,7 +19,6 @@
       <div class="mast-meta">
         <p>showing {{ shown }}</p>
         <p>{{ meta.priced }} of {{ meta.count }} have a published price</p>
-        <p>{{ meta.watching or 0 }} worth watching</p>
         <p>last pull {{ pull_when }}</p>
         {% if not setup and pull_href %}
         <p><a class="pull" href="{{ pull_href }}">pull again</a></p>
@@ -62,10 +61,6 @@
       {% elif city %}
         Everything on the board in {{ city }}. If the low / high is blank,
         Discovery didn’t publish a range for that listing.
-      {% elif view == "watch" %}
-        Nights the printed low fell since last pull, a printed scale that’s
-        stretched (high at least 2.5× the low), or a priced night inside
-        three days. The line is the low across pulls.
       {% elif view == "week" %}
         Shows in the next week. A blank low / high means Ticketmaster didn’t
         include a price range in the API response.
@@ -94,7 +89,7 @@
     {% if listings %}
     <ol class="board">
       {% for row in listings %}
-      <li class="row{% if row.watch %} watch{% endif %}">
+      <li class="row">
         <div class="when">
           {% if row.days is not none and row.days <= 0 %}
             <span class="n today">0</span>
@@ -133,9 +128,7 @@
             {% if row.spark %}
             <div class="hist">{{ row.spark | safe }}</div>
             {% endif %}
-            {% if row.watch %}
-            <p class="watch-why">watch · {{ row.watch_why }}</p>
-            {% elif row.delta %}
+            {% if row.delta %}
             <p class="delta">{{ row.delta }}{% if row.pulls > 1 %} · {{ row.pulls }} pulls{% endif %}</p>
             {% elif row.pulls > 1 %}
             <p class="delta">{{ row.pulls }} pulls</p>
@@ -164,9 +157,7 @@
         Discovery is Ticketmaster’s catalog. A listing may sell on ticketmaster.com
         or ticketweb.ca — Ticketweb is their Canadian / club storefront, same company.
         The stub on the right is the URL they sent. A missing low / high means they
-        didn’t publish a range. We don’t invent one. Worth watching: the low fell
-        since the last pull, the printed scale is wide, or the night is within
-        three days and has a number.
+        didn’t publish a range. We don’t invent one.
       </p>
     </footer>
   </div>

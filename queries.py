@@ -151,36 +151,6 @@ def sparkline_svg(values: list[float], w: int = 88, h: int = 20) -> str:
     )
 
 
-def watch_reasons(
-    lo: float | None,
-    hi: float | None,
-    prev_lo: float | None,
-    days: int | None,
-    history: list[float],
-) -> list[str]:
-    reasons = []
-    if lo is not None and prev_lo is not None and lo < prev_lo - 0.49:
-        reasons.append("low dipped")
-    elif lo is not None and len(history) >= 3 and history[-1] < history[0] - 0.49:
-        reasons.append("low sliding")
-    if lo is not None and hi is not None and lo > 0 and hi >= lo * 2.5:
-        reasons.append("wide scale")
-    if lo is not None and days is not None and 0 <= days <= 3:
-        reasons.append("close")
-    return reasons
-    with get_conn() as conn:
-        init_schema(conn)
-        row = conn.execute(
-            """
-            SELECT COUNT(*) AS n
-            FROM events
-            WHERE local_date >= CURRENT_DATE
-              AND COALESCE(status, '') NOT IN ('cancelled', 'canceled')
-            """
-        ).fetchone()
-        return int(row["n"]) if row else 0
-
-
 def load_board() -> tuple[list[dict], dict]:
     with get_conn() as conn:
         init_schema(conn)
@@ -272,7 +242,6 @@ def load_board() -> tuple[list[dict], dict]:
         if lo is not None and (not history or abs(history[-1] - lo) > 0.001):
             history = history + [lo]
             history = history[-8:]
-        reasons = watch_reasons(lo, hi if hi is not None else lo, prev_lo, days, history)
         place = ", ".join(p for p in (raw.get("venue_name"), city) if p)
         if state and city:
             place = f"{raw.get('venue_name') or '—'}, {city} {state}"
@@ -301,8 +270,6 @@ def load_board() -> tuple[list[dict], dict]:
                 "seller": seller_label(raw.get("url") or ""),
                 "spark": sparkline_svg(history),
                 "pulls": len(history),
-                "watch": bool(reasons),
-                "watch_why": " · ".join(reasons),
             }
         )
 
@@ -329,7 +296,6 @@ def load_board() -> tuple[list[dict], dict]:
     meta = {
         "count": len(listings),
         "priced": sum(1 for x in listings if x["priced"]),
-        "watching": sum(1 for x in listings if x["watch"]),
         "cities": cities,
         "pull": pull,
         "today": today.isoformat(),
@@ -346,15 +312,6 @@ def filter_listings(listings: list[dict], view: str = "priced", city: str | None
             for row in listings
             if row["days"] is not None and 0 <= row["days"] <= 7
         ]
-    if view == "watch":
-        watched = [row for row in listings if row.get("watch")]
-        return sorted(
-            watched,
-            key=lambda row: (
-                0 if "dipped" in (row.get("watch_why") or "") or "sliding" in (row.get("watch_why") or "") else 1,
-                row["days"] if row["days"] is not None else 999,
-            ),
-        )
     if view == "all":
         return listings
     return [row for row in listings if row["priced"]]

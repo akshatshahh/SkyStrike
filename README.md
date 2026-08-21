@@ -4,11 +4,6 @@ Upcoming Ticketmaster Discovery listings, sorted by how many days until the show
 
 This is not StubHub and not a seat map. A lot of events come back with no `priceRanges`. The board leaves those blank.
 
-**watch** is just a flag:
-- the low fell since last pull
-- the high is at least 2.5× the low
-- three days out or less, and they actually sent a number
-
 Rooms and names are in `watchlist.py`.
 
 ## local

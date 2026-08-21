@@ -82,7 +82,7 @@ if auto_pull():
             maybe_refresh()
 
 listings, meta = load_board()
-views = ["with prices", "worth watching", "all nights", "next 7 days"]
+views = ["with prices", "all nights", "next 7 days"]
 options = views + list(meta.get("cities") or [])
 
 bar, action = st.columns([6, 1])
@@ -103,8 +103,6 @@ with action:
 choice = choice or "with prices"
 if choice == "with prices":
     view, city = "priced", None
-elif choice == "worth watching":
-    view, city = "watch", None
 elif choice == "all nights":
     view, city = "all", None
 elif choice == "next 7 days":

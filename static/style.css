@@ -151,8 +151,6 @@ a.pull {
 
 .n.today { color: var(--stamp); }
 
-.row.watch .n { color: var(--stamp); }
-
 .hist {
   margin-top: 6px;
 }
@@ -160,15 +158,6 @@ a.pull {
 .spark {
   display: block;
   overflow: visible;
-}
-
-.watch-why {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--stamp);
-  margin: 5px 0 0;
 }
 
 .u {

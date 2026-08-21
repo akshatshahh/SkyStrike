@@ -52,11 +52,6 @@ def _chips(cities: list[str], view: str, city: str | None) -> list[dict]:
             "on": view == "all" and not city,
         },
         {
-            "label": "worth watching",
-            "href": "?view=watch",
-            "on": view == "watch" and not city,
-        },
-        {
             "label": "next 7 days",
             "href": "?view=week",
             "on": view == "week" and not city,
@@ -85,7 +80,7 @@ def render_board(
     if listings is None or meta is None:
         listings, meta = load_board()
     view = (view or "priced").strip().lower()
-    if view not in {"priced", "all", "week", "watch"}:
+    if view not in {"priced", "all", "week"}:
         view = "priced"
     city = (city or "").strip() or None
     visible = filter_listings(listings, view=view, city=city)
@@ -114,7 +109,7 @@ def render_setup(missing: list[str], db_ok: bool | None = None) -> str:
     return template.render(
         css=css,
         listings=[],
-        meta={"count": 0, "priced": 0, "watching": 0, "cities": []},
+        meta={"count": 0, "priced": 0, "cities": []},
         chips=[],
         shown=0,
         view="priced",

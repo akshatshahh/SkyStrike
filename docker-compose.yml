@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: daysout
+      POSTGRES_PASSWORD: daysout
+      POSTGRES_DB: daysout
+    ports:
+      - "5433:5432"
+    volumes:
+      - daysout_pg:/var/lib/postgresql/data
+
+volumes:
+  daysout_pg:

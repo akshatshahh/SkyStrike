@@ -1,0 +1,327 @@
+:root {
+  --paper: #efe6d0;
+  --ink: #1a140c;
+  --muted: #6e6658;
+  --rule: #1a140c;
+  --band: #e4d8bb;
+  --page: #c9bda4;
+  --stamp: #9b2118;
+  --bar: #1a140c;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: "Newsreader", "Iowan Old Style", Palatino, Georgia, serif;
+  font-optical-sizing: auto;
+}
+
+body {
+  min-height: 100vh;
+}
+
+.sheet {
+  max-width: 980px;
+  margin: 28px auto 72px;
+  background: var(--paper);
+  padding: 32px 36px 56px;
+  border: 1px solid #b9ab8e;
+  box-shadow: 2px 3px 0 rgba(26, 20, 12, 0.12);
+}
+
+.mast {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: end;
+  border-bottom: 3px solid var(--ink);
+  padding-bottom: 14px;
+}
+
+.kicker {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+  color: var(--muted);
+}
+
+h1 {
+  font-size: 64px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.82;
+  margin: 0;
+}
+
+.mast-meta {
+  text-align: right;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.mast-meta p { margin: 0; }
+
+a {
+  color: var(--ink);
+}
+
+a.pull {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.lede {
+  max-width: 62ch;
+  font-size: 19px;
+  line-height: 1.35;
+  margin: 22px 0 18px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 22px;
+}
+
+.chips a {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  background: transparent;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  padding: 4px 9px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.chips a.on,
+.chips a:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 220px 52px;
+  gap: 16px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--ink);
+}
+
+.board {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 220px 52px;
+  gap: 16px;
+  align-items: center;
+  padding: 13px 0 14px;
+  border-bottom: 1px solid rgba(26, 20, 12, 0.35);
+}
+
+.when {
+  text-align: left;
+}
+
+.n {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 34px;
+  font-weight: 500;
+  line-height: 0.9;
+  display: block;
+}
+
+.n.today { color: var(--stamp); }
+
+.row.watch .n { color: var(--stamp); }
+
+.hist {
+  margin-top: 6px;
+}
+
+.spark {
+  display: block;
+  overflow: visible;
+}
+
+.watch-why {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stamp);
+  margin: 5px 0 0;
+}
+
+.u {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.show h2 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 2px;
+  line-height: 1.1;
+}
+
+.event-name,
+.place,
+.date {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.event-name { font-style: italic; color: var(--ink); }
+
+.flag {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stamp);
+}
+
+.scale-nums {
+  display: flex;
+  justify-content: space-between;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.flat {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.scale-track {
+  position: relative;
+  height: 7px;
+  background: repeating-linear-gradient(
+    to right,
+    rgba(26, 20, 12, 0.2) 0 1px,
+    transparent 1px 8px
+  );
+  border-top: 1px solid rgba(26, 20, 12, 0.35);
+  border-bottom: 1px solid rgba(26, 20, 12, 0.35);
+}
+
+.scale-track i {
+  position: absolute;
+  top: -2px;
+  height: 9px;
+  background: var(--bar);
+  display: block;
+}
+
+.delta, .none {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin: 6px 0 0;
+}
+
+.none { font-style: italic; }
+
+.stub {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  border-left: 1px dashed var(--ink);
+  padding: 4px 0 4px 10px;
+  justify-self: end;
+  height: 72px;
+  display: flex;
+  align-items: center;
+}
+
+.stub:hover { color: var(--stamp); }
+.stub.dead { border-left-style: dotted; color: var(--muted); }
+
+.foot {
+  margin-top: 36px;
+  border-top: 1px solid var(--ink);
+  padding-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 62ch;
+}
+
+.foot p { margin: 0 0 8px; }
+
+.notice {
+  border: 1px solid var(--ink);
+  padding: 18px 20px;
+  margin: 8px 0 28px;
+  background: var(--band);
+}
+
+.notice h2 {
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+
+.notice p, .notice li {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.mono {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.86em;
+}
+
+.empty {
+  font-size: 18px;
+  padding: 28px 0;
+}
+
+@media (max-width: 720px) {
+  .sheet { margin: 0; border: 0; padding: 22px 16px 48px; }
+  h1 { font-size: 48px; }
+  .mast { flex-direction: column; align-items: start; }
+  .mast-meta { text-align: left; }
+  .cols { display: none; }
+  .row {
+    grid-template-columns: 56px minmax(0, 1fr) 36px;
+    grid-template-areas:
+      "when show stub"
+      "when scale stub";
+    align-items: start;
+  }
+  .when { grid-area: when; }
+  .show { grid-area: show; }
+  .scale { grid-area: scale; margin-top: 8px; }
+  .stub { grid-area: stub; height: 56px; }
+}

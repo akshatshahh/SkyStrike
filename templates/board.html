@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>days out</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+  <style>{{ css | safe }}</style>
+</head>
+<body>
+  <div class="sheet">
+    <header class="mast">
+      <div class="mast-name">
+        <p class="kicker">ticketmaster discovery · {{ issue }}</p>
+        <h1>days out</h1>
+      </div>
+      <div class="mast-meta">
+        <p>showing {{ shown }}</p>
+        <p>{{ meta.priced }} of {{ meta.count }} have a published price</p>
+        <p>{{ meta.watching or 0 }} worth watching</p>
+        <p>last pull {{ pull_when }}</p>
+        {% if not setup and pull_href %}
+        <p><a class="pull" href="{{ pull_href }}">pull again</a></p>
+        {% endif %}
+      </div>
+    </header>
+
+    {% if setup %}
+      <p class="lede">
+        Upcoming nights, lined up by how soon they are, with Ticketmaster’s
+        published low and high when they send one.
+      </p>
+      <section class="notice">
+        <h2>this board is dark</h2>
+        <p>
+          Needs a Ticketmaster consumer key and a Postgres URL. Both go in
+          <span class="mono">.env</span> locally, or in Streamlit / host secrets.
+        </p>
+        <ul>
+          {% for item in setup.missing %}
+          <li>missing <span class="mono">{{ item }}</span></li>
+          {% endfor %}
+          {% if setup.db_ok == False %}
+          <li>Postgres did not accept the connection</li>
+          {% endif %}
+        </ul>
+        <p>
+          Key: <a href="https://developer.ticketmaster.com" target="_blank" rel="noreferrer">developer.ticketmaster.com</a>
+          · database: a free Neon instance works. Then run
+          <span class="mono">python ingest.py</span>.
+        </p>
+      </section>
+    {% else %}
+
+    <p class="lede">
+      {% if view == "priced" and not city %}
+        These are the nights Ticketmaster actually sent a dollar range — a printed
+        low and high, not a live seat. Arena tours often come back with nothing;
+        that’s why “all nights” looks empty of prices.
+      {% elif city %}
+        Everything on the board in {{ city }}. If the low / high is blank,
+        Discovery didn’t publish a range for that listing.
+      {% elif view == "watch" %}
+        Nights the printed low fell since last pull, a printed scale that’s
+        stretched (high at least 2.5× the low), or a priced night inside
+        three days. The line is the low across pulls.
+      {% elif view == "week" %}
+        Shows in the next week. A blank low / high means Ticketmaster didn’t
+        include a price range in the API response.
+      {% else %}
+        Every pulled night, soonest first. Blank low / high is not a bug:
+        Ticketmaster’s Discovery API simply didn’t send <span class="mono">priceRanges</span>
+        for that event. Use “with prices” to hide those.
+      {% endif %}
+    </p>
+
+    {% if chips %}
+    <nav class="chips" aria-label="filter">
+      {% for chip in chips %}
+      <a class="{{ 'on' if chip.on else '' }}" href="{{ chip.href }}">{{ chip.label }}</a>
+      {% endfor %}
+    </nav>
+    {% endif %}
+
+    <div class="cols" aria-hidden="true">
+      <span>out</span>
+      <span>night</span>
+      <span>low / high</span>
+      <span></span>
+    </div>
+
+    {% if listings %}
+    <ol class="board">
+      {% for row in listings %}
+      <li class="row{% if row.watch %} watch{% endif %}">
+        <div class="when">
+          {% if row.days is not none and row.days <= 0 %}
+            <span class="n today">0</span>
+            <span class="u">today</span>
+          {% else %}
+            <span class="n">{{ row.days if row.days is not none else "—" }}</span>
+            <span class="u">{{ row.days_label }}</span>
+          {% endif %}
+        </div>
+        <div class="show">
+          <h2>{{ row.headline }}</h2>
+          {% if row.attraction and row.attraction != row.name %}
+            <p class="event-name">{{ row.name }}</p>
+          {% endif %}
+          <p class="place">{{ row.place }}</p>
+          <p class="date">
+            {{ row.when }}
+            {% if row.status and row.status not in ("onsale", "offsale", "") %}
+              <span class="flag">{{ row.status }}</span>
+            {% elif row.status == "offsale" %}
+              <span class="flag">offsale</span>
+            {% endif %}
+            {% if row.genre %}<span class="dot">·</span> {{ row.genre }}{% endif %}
+          </p>
+        </div>
+        <div class="scale">
+          {% if row.priced %}
+            <div class="scale-nums">
+              <span>{{ row.lo_label }}</span>
+              {% if not row.same_price %}<span>{{ row.hi_label }}</span>{% endif %}
+              {% if row.same_price %}<span class="flat">flat</span>{% endif %}
+            </div>
+            <div class="scale-track">
+              <i style="left: {{ row.bar_left }}%; width: {{ row.bar_width }}%"></i>
+            </div>
+            {% if row.spark %}
+            <div class="hist">{{ row.spark | safe }}</div>
+            {% endif %}
+            {% if row.watch %}
+            <p class="watch-why">watch · {{ row.watch_why }}</p>
+            {% elif row.delta %}
+            <p class="delta">{{ row.delta }}{% if row.pulls > 1 %} · {{ row.pulls }} pulls{% endif %}</p>
+            {% elif row.pulls > 1 %}
+            <p class="delta">{{ row.pulls }} pulls</p>
+            {% endif %}
+          {% else %}
+            <p class="none">no price published</p>
+          {% endif %}
+        </div>
+        {% if row.url %}
+        <a class="stub" href="{{ row.url }}" target="_blank" rel="noreferrer">{{ row.seller }}</a>
+        {% else %}
+        <span class="stub dead">—</span>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+      <p class="empty">Nothing in this cut. Try “with prices” or “all nights”.</p>
+    {% endif %}
+
+    {% endif %}
+
+    <footer class="foot">
+      <p>Powered by Ticketmaster.</p>
+      <p>
+        Discovery is Ticketmaster’s catalog. A listing may sell on ticketmaster.com
+        or ticketweb.ca — Ticketweb is their Canadian / club storefront, same company.
+        The stub on the right is the URL they sent. A missing low / high means they
+        didn’t publish a range. We don’t invent one. Worth watching: the low fell
+        since the last pull, the printed scale is wide, or the night is within
+        three days and has a number.
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
